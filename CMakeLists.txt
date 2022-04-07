@@ -39,10 +39,24 @@ target_link_libraries(
         cryptopp-static
         Drogon::Drogon
         hidapi::hidapi
-        hidapi::winapi
         hidapi::include
         magic_enum::magic_enum
 )
+
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    target_link_libraries(
+            ${PROJECT_NAME}
+            PRIVATE
+            hidapi::hidraw
+            hidapi::libusb
+    )
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    target_link_libraries(
+            ${PROJECT_NAME}
+            PRIVATE
+            hidapi::winapi
+    )
+endif ()
 
 aux_source_directory(controllers CTL_SRC)
 aux_source_directory(filters FILTER_SRC)
