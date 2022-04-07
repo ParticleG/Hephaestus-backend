@@ -1,0 +1,48 @@
+name: CMake
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  get-info:
+    runs-on: ubuntu-latest
+    outputs:
+      commit: ${{ steps.actual-get-info.outputs.commit }}
+    steps:
+    - uses: actions/checkout@v2
+    - name: Get Version
+      id: actual-get-info
+      run: echo "::set-output name=commit::$(git rev-parse --short ${{ GITHUB.SHA }})"
+      
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: 'recursive'
+    - name: Configure CMake
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+    - name: Install
+      run: cmake --install ${{github.workspace}}/build
+    - name: Upload
+      uses: actions/upload-artifact@v2
+      with:
+        name: Hephaestus_${{ needs.get-info.outputs.commit }}_${{ GITHUB.RUN_NUMBER }}_Linux
+        path: ${{github.workspace}}/build
+
+#     - name: Test
+#       working-directory: ${{github.workspace}}/build
+#       # Execute tests defined by the CMake configuration.  
+#       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
+#       run: ctest -C ${{env.BUILD_TYPE}}
+      
