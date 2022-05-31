@@ -54,7 +54,6 @@
             "woff",
             "eot"
         ],
-        //locations: An array of locations of static files for GET requests.
         "locations": [
             {
                 "default_content_type": "text/plain",
